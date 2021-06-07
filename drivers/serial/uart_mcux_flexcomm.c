@@ -27,6 +27,7 @@ struct mcux_flexcomm_config {
 	const struct device *clock_dev;
 	clock_control_subsys_t clock_subsys;
 	uint32_t baud_rate;
+	uint8_t parity;
 #ifdef CONFIG_UART_INTERRUPT_DRIVEN
 	void (*irq_config_func)(const struct device *dev);
 #endif
@@ -258,6 +259,7 @@ static int mcux_flexcomm_init(const struct device *dev)
 	USART_GetDefaultConfig(&usart_config);
 	usart_config.enableTx = true;
 	usart_config.enableRx = true;
+	usart_config.parityMode = config->parity == UART_CFG_PARITY_ODD ? kUSART_ParityOdd : config->parity;
 	usart_config.baudRate_Bps = config->baud_rate;
 
 	USART_Init(config->base, &usart_config, clock_freq);
@@ -321,6 +323,7 @@ static const struct mcux_flexcomm_config mcux_flexcomm_##n##_config = {	\
 	.clock_subsys =				\
 	(clock_control_subsys_t)DT_INST_CLOCKS_CELL(n, name),\
 	.baud_rate = DT_INST_PROP(n, current_speed),			\
+	.parity = DT_INST_PROP_OR(n, parity, UART_CFG_PARITY_NONE), \
 	IRQ_FUNC_INIT							\
 }
 
